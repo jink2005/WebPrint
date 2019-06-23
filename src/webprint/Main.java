@@ -18,24 +18,14 @@
  */
 package webprint;
 
-import dorkbox.systemTray.Menu;
-import dorkbox.systemTray.MenuItem;
+import dorkbox.systemTray.MenuEntry;
 import dorkbox.systemTray.SystemTray;
-import java.awt.AWTException;
-import java.awt.Image;
-import java.awt.PopupMenu;
+import dorkbox.systemTray.SystemTrayMenuAction;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -60,15 +50,13 @@ public class Main extends javax.swing.JFrame {
     public Main(){
         acl = new AccessControl();
         this.setName("WebPrint");
-        ImageIcon icon = new ImageIcon("img/webprinticonsmall.png");
-        this.setIconImage(icon.getImage());
+        this.setIconImage(Toolkit.getDefaultToolkit().getImage("img/webprinticonsmall.png"));
         JPanel rootPanel = (JPanel) this.getRootPane().getContentPane();
         rootPanel.setVisible(true);
         initSystemTray();
         startServer();
         settingFrame = new SettingsFrame(this);
         settingFrame.setLocationRelativeTo(null);
-        settingFrame.setIconImage(icon.getImage());
     }
     
     public static String getUserDataPath(){
@@ -139,84 +127,27 @@ public class Main extends javax.swing.JFrame {
             System.out.println("Unable to set LookAndFeel");
         }
         // Setup system tray
-        //SystemTray.DEBUG = true;
-        SystemTray.PREFER_GTK3 = true;
-        tray = SystemTray.get();
-        
-        if (tray != null){
-            
-            Menu menu = tray.getMenu();
-            
-            menu.add(new MenuItem("Setings", new ActionListener() {
+        SystemTray.FORCE_GTK2 = true;
+        tray = SystemTray.getSystemTray();
+        if (tray!=null){
+            tray.addMenuEntry("Settings", new SystemTrayMenuAction() {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void onClick(SystemTray st, MenuEntry me) {
                     showSettings();
                 }
-            }));
+            });
             
-            menu.add(new MenuItem("Exit", new ActionListener() {
+            tray.addMenuEntry("Exit", new SystemTrayMenuAction() {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void onClick(SystemTray st, MenuEntry me) {
                     System.out.println("Exiting....");
                     System.exit(0);
                 }
-            }));
+            });
 
-            tray.setImage(Main.class.getResource("img/webprinticonsmall.png"));
+            tray.setIcon(Main.class.getResource("img/webprinticonsmall.png"));
             
-            tray.setEnabled(true);
-            
-            //System.out.println(tray.getClass().getName());
+            System.out.println(tray.getClass().getName());
         }
-        
-        /*if (java.awt.SystemTray.isSupported()) {
-            System.out.println("creating normal systemtray instance");
-            System.out.println("system tray supported");
-            java.awt.SystemTray javaTray = java.awt.SystemTray.getSystemTray();
-
-            Image image = Toolkit.getDefaultToolkit().getImage(Main.class.getResource("img/webprinticonsmall.png"));
-            // AWT tray icon (doesn't allow radio buttons)
-            ActionListener exitListener = new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    System.out.println("Exiting....");
-                    System.exit(0);
-                }
-            };
-
-            ActionListener openListener = new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                     showSettings();
-                }
-            };
-            
-            PopupMenu popup = new PopupMenu(); 
-            java.awt.MenuItem settingsItem = new java.awt.MenuItem("Settings..."); 
-            settingsItem.addActionListener(openListener);
-            popup.add(settingsItem);
-            
-            java.awt.MenuItem exitItem = new java.awt.MenuItem("Exit");
-            exitItem.addActionListener(exitListener);
-            popup.add(exitItem);
-            // swing tray icon
-            //genTrayMenu();
-
-            trayIcon = new TrayIcon(image);
-            trayIcon.setPopupMenu(popup);
-            trayIcon.setImageAutoSize(true);
-            trayIcon.setToolTip("WebPrint");
-            try {
-                javaTray.add(trayIcon);
-            } catch (AWTException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-        } else {
-            System.out.println("system tray not supported");
-            return;
-        }*/
     }
 }
