@@ -46,3 +46,42 @@ A big thanks to the qz-print guys for allowing this project to happen and EJ Tec
 [![Install4j](https://www.ej-technologies.com/images/product_banners/install4j_large.png)](http://www.ej-technologies.com/products/install4j/overview.html)
 
 [Install4j: Multi-platform installer builder](http://www.ej-technologies.com/products/install4j/overview.html)
+
+# Install Dependencies
+
+https://github.com/qzind/tray/wiki/install-dependencies
+
+# Compiling
+
+https://github.com/qzind/tray/wiki/Compiling
+
+## Steps
+
+1. First, install dependencies (jdk, git, ant, nsis/makeself) per Install Dependencies
+
+2. Clone the source code per Clone Source Code
+
+3. Pull in the latest source code
+
+```
+cd tray
+git pull
+```
+4. Compile
+
+```
+ant
+```
+
+Optional: Start the software up using this command.
+
+5. Package
+
+```
+ant nsis       # <-- Windows installer
+ant pkgbuild   # <-- Apple installer
+ant makeself   # <-- Linux installer
+```
+
+Note: The installer will be placed in ./out/qz-tray-x.x.x.x, (i.e. .exe, .run, .pkg)
+
