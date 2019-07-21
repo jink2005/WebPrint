@@ -59,6 +59,73 @@ https://github.com/qzind/tray/wiki/Compiling
 
 1. First, install dependencies (jdk, git, ant, nsis/makeself) per Install Dependencies
 
+### JDK
+JDK7 is sufficient for building QZ Tray/QZ Print 1.9
+
+### Windows
+Install :warning:JDK 7 or higher:
+
+http://www.oracle.com/technetwork/java/javase/downloads/
+
+Download and extract Apache Ant:
+
+https://ant.apache.org/bindownload.cgi
+
+Setup environment variables JAVA_HOME, PATH, etc:
+
+Assume Ant is installed in c:\ant\. The following commands set up the environment:
+
+```
+ set ANT_HOME=c:\ant
+ set JAVA_HOME=c:\jdk1.7.0_51
+ set PATH=%PATH%;%ANT_HOME%\bin
+```
+
+http://ant.apache.org/manual/install.html#setup
+
+Install NSIS 3.0+:
+
+http://nsis.sourceforge.net/Download
+
+Install git:
+
+https://git-scm.com/download/win
+
+### Mac
+Install command line tools for OS X (installation methods vary)
+
+Install :warning:JDK 7 or higher via: http://www.oracle.com/technetwork/java/javase/downloads/
+
+Install homebrew via:
+
+```
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+```
+
+Install brew dependencies via:
+
+```
+brew install ant makeself nsis
+```
+
+Install git:
+
+https://git-scm.com/download/mac
+
+### Ubuntu
+Install all dependencies (:warning:jdk7, ant, nsis, makeself) via:
+
+```
+sudo apt-get install git openjdk-7-jdk ant nsis makeself
+```
+
+### Fedora
+Install all dependencies (:warning:jdk, ant, nsis, makeself) via:
+
+```
+sudo yum install git java-1.?.0-openjdk-devel java-1.?.0-openjdk-openjfx-devel ant nsis makeself
+```
+
 2. Clone the source code per Clone Source Code
 
 3. Pull in the latest source code
@@ -75,6 +142,32 @@ ant
 
 Optional: Start the software up using this command.
 
+Basic syntax (after closing all instances of QZ Tray)
+
+```
+java -Xms512M -jar qz-tray.jar
+```
+
+Windows (after closing all instances of QZ Tray)
+
+```
+java -Xms512M -jar "%PROGRAMFILES%\QZ Tray\qz-tray.jar"
+```
+
+Mac OS X (after closing all instances of QZ Tray)
+
+```
+/Applications/QZ\ Tray.app/Contents/MacOS/QZ\ Tray
+```
+
+Linux/Other (after closing all instances of QZ Tray)
+
+```
+java -Xms512M -jar /opt/qz-tray/qz-tray.jar
+```
+
+QZ Tray launches with 512MB of memory. We must specify -Xms512M in the command in order to prevent unexpected behavior and crashing. This unnecessary for Mac unless following the basic syntax (java -jar qz-tray.jar) . More memory can be allocated but should not be necessary.
+
 5. Package
 
 ```
@@ -82,6 +175,13 @@ ant nsis       # <-- Windows installer
 ant pkgbuild   # <-- Apple installer
 ant makeself   # <-- Linux installer
 ```
+
+6. QZ Tray places log files in the following locations:
+
+Windows: %APPDATA%\qz
+Mac: ~/Library/Application Support/qz
+Linux: ~/.qz
+
 
 Note: The installer will be placed in ./out/qz-tray-x.x.x.x, (i.e. .exe, .run, .pkg)
 
