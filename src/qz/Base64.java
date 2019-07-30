@@ -36,9 +36,8 @@ package qz;
  * 
  * <p>Example:</p>
  * 
- * <code>String encoded = Base64.encode( myByteArray );</code>
- * <br />
- * <code>byte[] myByteArray = Base64.decode( encoded );</code>
+ * <code>String encoded = Base64.encode( myByteArray );
+ * byte[] myByteArray = Base64.decode( encoded );</code>
  *
  * <p>The <tt>options</tt> parameter, which appears in a few places, is used to pass 
  * several pieces of information to the encoder. In the "higher level" methods such as 
@@ -102,7 +101,7 @@ package qz;
  *      own projects and then had gobs of javadoc warnings on this file.</li>
  *   </ul>
  *  <li>v2.2.1 - Fixed bug using URL_SAFE and ORDERED encodings. Fixed bug
- *   when using very small files (~< 40 bytes).</li>
+ *   when using very small files (~&lt; 40 bytes).</li>
  *  <li>v2.2 - Added some helper methods for encoding/decoding directly from
  *   one file to the next. Also added a main() method to support command line
  *   encoding/decoding from one file to the next. Also added these Base64 dialects:
@@ -1623,7 +1622,7 @@ public class Base64
          * Valid options:<pre>
          *   ENCODE or DECODE: Encode or Decode as data is read.
          *   DO_BREAK_LINES: break lines at 76 characters
-         *     (only meaningful when encoding)</i>
+         *     <i>(only meaningful when encoding)</i>
          * </pre>
          * <p>
          * Example: <code>new Base64.InputStream( in, Base64.DECODE )</code>
@@ -1838,7 +1837,7 @@ public class Base64
          * Valid options:<pre>
          *   ENCODE or DECODE: Encode or Decode as data is read.
          *   DO_BREAK_LINES: don't break lines at 76 characters
-         *     (only meaningful when encoding)</i>
+         *     <i>(only meaningful when encoding)</i>
          * </pre>
          * <p>
          * Example: <code>new Base64.OutputStream( out, Base64.ENCODE )</code>

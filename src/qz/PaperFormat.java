@@ -136,14 +136,13 @@ public class PaperFormat {
             default: return OrientationRequested.PORTRAIT; 
         }
     }
-
+    
     /**
      * Automatically calculates the best <code>PaperSize</code> based on the supplied 
      * image dimensions 
      * @param imageWidth
      * @param imageHeight
-     * @param p
-     * @return 
+     * @param p 
      */
     public static void setAutoSize(int imageWidth, int imageHeight, PaperFormat p) {
         // swap image dimensions
@@ -253,11 +252,13 @@ public class PaperFormat {
     public int getUnits() {
         return units;
     }
-
+    
     /**
      * Parses paper size (such as 8.5in x 11.0 in) and sets it
      * @param width
-     * @param height 
+     * @param height
+     * @return
+     * @throws NumberFormatException 
      */
     public static PaperFormat parseSize(String width, String height) throws NumberFormatException {
         if (width.toLowerCase().endsWith("in") && height.toLowerCase().endsWith("in")) {
@@ -268,12 +269,14 @@ public class PaperFormat {
             return parseSize(width, height, null);
         }
     }
-
+    
     /**
      * Sets paper size and units, example:  8.5, 11.0, mm.
      * @param width
      * @param height
-     * @param unit 
+     * @param units
+     * @return
+     * @throws NumberFormatException 
      */
     public static PaperFormat parseSize(String width, String height, String units) throws NumberFormatException {
         if (width == null || height == null) {

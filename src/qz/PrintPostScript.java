@@ -424,8 +424,8 @@ public class PrintPostScript implements Printable {
      * getDrawRect(PageFormat pageFormat) { Dimension imageSize =
      * getImageDpiSize();
      *
-     * // Do resize if image size is more than page size if (imageSize.width >
-     * pageFormat.getImageableWidth() || imageSize.height >
+     * // Do resize if image size is more than page size if (imageSize.width &gt;
+     * pageFormat.getImageableWidth() || imageSize.height &gt;
      * pageFormat.getImageableHeight()) { double scale =
      * getScaleByPageSize(pageFormat);
      *
@@ -442,8 +442,8 @@ public class PrintPostScript implements Printable {
      * getScaleByPageSize(PageFormat pageFormat) { double scale = 1; Dimension
      * imageSize = getImageDpiSize();
      *
-     * // If it's bigger we shall do nothing if (imageSize.width >
-     * pageFormat.getImageableWidth() || imageSize.height >
+     * // If it's bigger we shall do nothing if (imageSize.width &gt;
+     * pageFormat.getImageableWidth() || imageSize.height &gt;
      * pageFormat.getImageableHeight()) { double widthScale = imageSize.width /
      * pageFormat.getImageableWidth(); double heigthScale = imageSize.height /
      * pageFormat.getImageableHeight();

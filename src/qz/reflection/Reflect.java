@@ -49,7 +49,7 @@ import java.util.Map;
  * A wrapper for an {@link Object} or {@link Class} upon which reflective calls
  * can be made.
  * <p>
- * An example of using <code>Reflect</code> is <code><pre>
+ * An example of using <code>Reflect</code> is<pre>
  * // Static import all reflection methods to decrease verbosity
  * import static org.joor.Reflect.*;
  *
@@ -60,6 +60,7 @@ import java.util.Map;
  * // Invoke methods using the call() method:
  * .call("toString")
  * // Retrieve the wrapped object
+ * </pre>
  *
  * @author Lukas Eder
  */
@@ -265,10 +266,10 @@ public class Reflect {
      * fields. If the wrapped object is any other {@link Object}, then this will
      * return instance fields.
      * <p>
-     * These two calls are equivalent <code><pre>
+     * These two calls are equivalent <code>
      * on(object).field("myField");
      * on(object).fields().get("myField");
-     * </pre></code>
+     * </code>
      *
      * @return A map containing field names and wrapped values.
      */
@@ -313,16 +314,16 @@ public class Reflect {
      * Just like {@link Method#invoke(Object, Object...)}, this will try to wrap
      * primitive types or unwrap primitive type wrappers if applicable. If
      * several methods are applicable, by that rule, the first one encountered
-     * is called. i.e. when calling <code><pre>
+     * is called. i.e. when calling <code>
      * on(...).call("method", 1, 1);
-     * </pre></code> The first of the following methods will be called:
-     * <code><pre>
+     * </code> The first of the following methods will be called:
+     * <code>
      * public void method(int param1, Integer param2);
      * public void method(Integer param1, int param2);
      * public void method(Number param1, Number param2);
      * public void method(Number param1, Object param2);
      * public void method(int param1, Object param2);
-     * </pre></code>
+     * </code>
      *
      * @param name The method name
      * @param args The method arguments
@@ -379,16 +380,16 @@ public class Reflect {
      * Just like {@link Constructor#newInstance(Object...)}, this will try to
      * wrap primitive types or unwrap primitive type wrappers if applicable. If
      * several constructors are applicable, by that rule, the first one
-     * encountered is called. i.e. when calling <code><pre>
+     * encountered is called. i.e. when calling <code>
      * on(C.class).create(1, 1);
-     * </pre></code> The first of the following constructors will be applied:
-     * <code><pre>
+     * </code> The first of the following constructors will be applied:
+     * <code>
      * public C(int param1, Integer param2);
      * public C(Integer param1, int param2);
      * public C(Number param1, Number param2);
      * public C(Number param1, Object param2);
      * public C(int param1, Object param2);
-     * </pre></code>
+     * </code>
      *
      * @param args The constructor arguments
      * @return The wrapped new object, to be used for further reflection.

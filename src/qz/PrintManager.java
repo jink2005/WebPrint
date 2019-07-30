@@ -770,13 +770,12 @@ public class PrintManager {
         }
         return false;
     }
-
+    
     /**
      * Creates the print service by iterating through printers until finding
      * matching printer containing "printerName" in its description
-     *
-     * @param printerName
-     * @return
+     * @param printer
+     * @return 
      */
     public boolean setPrinter(String printer) {
         PrintService pservice = PrintServiceMatcher.findPrinter(printer);
@@ -992,8 +991,6 @@ public class PrintManager {
      * found for the specified MAC address. The format of these (IPv4 vs. IPv6)
      * may vary depending on the system.
      *
-     * @param macAddress
-     * @return
      */
     /* public String getIPAddresses(String macAddress) {
      return getNetworkHashMap().get(macAddress).getInetAddressesCSV();
@@ -1134,12 +1131,7 @@ public class PrintManager {
     public String getVersion() {
         return VERSION;
     }
-
-    /**
-     * Sets the time the listener thread will wait between actions
-     *
-     * @param sleep
-     */
+    
     public String getEndOfDocument() {
         return endOfDocument;
     }

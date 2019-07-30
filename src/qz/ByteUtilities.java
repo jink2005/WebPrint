@@ -86,14 +86,14 @@ public class ByteUtilities {
         }
         return new String(hexChars);
     }
-
+    
     /**
      * Iterates through byte array finding matches of a sublist of bytes.
      * Returns an array of positions. TODO: Make this natively Iterable.
      *
      * @param array
-     * @param target
-     * @return
+     * @param sublist
+     * @return 
      */
     public static int[] indicesOfSublist(byte[] array, byte[] sublist) {
         LinkedList<Integer> indexes = new LinkedList<Integer>();

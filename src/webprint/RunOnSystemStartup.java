@@ -68,8 +68,7 @@ public class RunOnSystemStartup {
      * Methods
      */
     /**
-     * Returns whether this JAR file is installed to run on system startup
-     * @return 
+     * @return Returns whether this JAR file is installed to run on system startup
      * @throws java.lang.Exception
      */
     public static boolean isInstalled() throws Exception {

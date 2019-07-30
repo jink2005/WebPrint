@@ -95,14 +95,14 @@ public class PrintRaw {
         this.reqAttr.set(reqAttr);
         this.charset.set(charset);
     }
-
+    
     /**
      * Constructor added version 1.4.6 for lpr raw compatibility with Lion
-     *
      * @param ps
-     * @param rawCmds
+     * @param printString
      * @param charset
      * @param alternatePrint
+     * @throws UnsupportedEncodingException 
      */
     public PrintRaw(PrintService ps, String printString, Charset charset, boolean alternatePrint) throws UnsupportedEncodingException {
         this.ps.set(ps);
@@ -186,7 +186,7 @@ public class PrintRaw {
     public boolean print() throws IOException, InterruptedException, PrintException, UnsupportedEncodingException {
         return print(null);
     }
-
+    
     /**
      * Constructs a
      * <code>javax.print.SimpleDoc</code> with the previously defined byte
@@ -194,13 +194,12 @@ public class PrintRaw {
      * <code>offset</code> and
      * <code>end</code> are specified, prints the subarray of the original byte
      * array.
-     *
-     * @param offset
-     * @param end
+     * @param data
      * @return
+     * @throws IOException
      * @throws PrintException
      * @throws InterruptedException
-     * @throws UnsupportedEncodingException
+     * @throws UnsupportedEncodingException 
      */
     public boolean print(byte[] data) throws IOException, PrintException, InterruptedException, UnsupportedEncodingException {
         if (ps.get() == null) {
@@ -343,11 +342,13 @@ public class PrintRaw {
     // }
     /**
      * Convenience method for RawPrint constructor and print method
-     *
-     * @param ps The PrintService object
-     * @param commands The RAW commands to be sent directly to the printer
-     * @return True if print job created successfull
-     * @throws javax.print.PrintException
+     * @param ps
+     * @param rawCmds
+     * @return
+     * @throws IOException
+     * @throws PrintException
+     * @throws InterruptedException
+     * @throws UnsupportedEncodingException 
      */
     public static boolean print(PrintService ps, String rawCmds) throws IOException, PrintException, InterruptedException, UnsupportedEncodingException {
         PrintRaw p = new PrintRaw(ps, rawCmds);
@@ -428,7 +429,7 @@ public class PrintRaw {
     }
 
     /**
-     * Sets the raw print data (or print commands) to blank <scode>String</code>
+     * Sets the raw print data (or print commands) to blank <code>String</code>
      */
     public void clear() {
         getRawCmds().clear();
@@ -515,9 +516,6 @@ public class PrintRaw {
     /**
      * Iterates through byte array finding matches of a sublist of bytes.
      * Returns an array of positions. TODO: Make this natively Iterable.
-     *
-     * @param array
-     * @return
      */
     //public int[] indicesOfSublist(byte[] sublist) {
     //    return ByteUtilities.indicesOfSublist(this.getRawCmds().getByteArray(), sublist);
