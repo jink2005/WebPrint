@@ -398,6 +398,7 @@ class Server {
             try {
                 while (!Thread.interrupted() && this.conn.isOpen()) {
                     this.httpservice.handleRequest(this.conn, context);
+                    System.out.println("Request handled.");
                 }
             } catch (ConnectionClosedException ex) {
                 System.err.println("Client closed connection");
