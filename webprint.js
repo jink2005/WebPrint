@@ -28,7 +28,8 @@ var WebPrint = function (init, opt) {
     $.extend(options, opt);
 
     this.printRaw = function (data, printer) {
-        var request = {a: "printraw", printer: printer, data: btoa(data)};
+        // var request = {a: "printraw", printer: printer, data: btoa(data)};
+        var request = {a: "printraw", printer: printer, data: BASE64.encode(data)};
         sendAppletRequest(request);
     };
 
@@ -37,12 +38,14 @@ var WebPrint = function (init, opt) {
             alert("Serial port printing is not available in Android.");
             return;
         }
-        var request = {a: "printraw", port: port, data: btoa(data)};
+        // var request = {a: "printraw", port: port, data: btoa(data)};
+        var request = {a: "printraw", port: port, data: BASE64.encode(data)};
         sendAppletRequest(request);
     };
     
     this.printTcp = function (data, socket) {
-        var request = {a: "printraw", socket: socket, data: btoa(data)};
+        // var request = {a: "printraw", socket: socket, data: btoa(data)};
+        var request = {a: "printraw", socket: socket, data: BASE64.encode(data)};
         sendAppletRequest(request);
     };
 
