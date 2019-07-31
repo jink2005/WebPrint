@@ -19,7 +19,7 @@
 var WebPrint = function (init, opt) {
     var options = {
         relayHost: "127.0.0.1",
-        relayPort: "8080",
+        relayPort: "8888",
         listPrinterCallback: null,
         listPortsCallback: null,
         readyCallback: null
