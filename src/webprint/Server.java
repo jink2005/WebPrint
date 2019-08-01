@@ -77,7 +77,7 @@ class Server {
     private Main app;
     private RequestListenerThread thread;
     static JFrame jframe;
-    private String address = "127.0.0.1";
+    private String address = "0.0.0.0";
     private int port = 8888;
     public String error = "";
 
