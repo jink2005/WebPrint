@@ -208,7 +208,7 @@ class Server {
                     // Get request and parse JSON
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     ((HttpEntityEnclosingRequest) request).getEntity().writeTo(stream);
-                    String entityContent = stream.toString();
+                    String entityContent = stream.toString("UTF-8");
                     System.out.println(entityContent);
                     // parse json and get request
                     JSONObject jrequest = new JSONObject(entityContent);
