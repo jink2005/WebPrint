@@ -86,6 +86,7 @@ public class SettingsFrame extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
 
         setTitle("WebPrint Settings");
+        setAlwaysOnTop(true);
 
         jLabel1.setFont(new java.awt.Font("Cantarell", 1, 15)); // NOI18N
         jLabel1.setText("General");
