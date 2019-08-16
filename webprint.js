@@ -156,7 +156,7 @@ var WebPrint = function (init, opt) {
     }
 
     function dispatchWebPrint() {
-        var answer = confirm("Cannot communicate with the printing app.\nWould you like to open/install the printing app?");
+        var answer = confirm("无法连接打印服务，是否安装打印服务？\nCannot communicate with the printing app.\nWould you like to open/install the printing app?");
         if (answer) {
             if (isAndroid){
                 deployAndroid();
@@ -167,7 +167,7 @@ var WebPrint = function (init, opt) {
             if (navigator.appVersion.indexOf("Mac")!=-1) installFile="WebPrint_macos_1_1_1.dmg";
             if (navigator.appVersion.indexOf("X11")!=-1) installFile="WebPrint_unix_1_1_1.sh";
             if (navigator.appVersion.indexOf("Linux")!=-1) installFile="WebPrint_unix_1_1_1.sh";
-            window.open("https://content.wallaceit.com.au/webprint/"+installFile, '_blank');
+            window.open("http://www.lnnear.com/download/webprint/"+installFile, '_blank');
         }
     }
 

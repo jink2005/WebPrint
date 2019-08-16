@@ -123,7 +123,7 @@ public class PrintManager {
     }
 
     private void processParameters() {
-        jobName = "QZ-PRINT ___ Printing";
+        jobName = "WebPrint ___ Printing";
         allowMultiple = false;
         logFeaturesPS = false;
         alternatePrint = false;
@@ -1202,7 +1202,7 @@ public class PrintManager {
     }
 
     private void logStart() {
-        LogIt.log("QZ-PRINT " + VERSION);
+        LogIt.log("WebPrint " + VERSION);
         LogIt.log("===== APPLET STARTED =====");
     }
 
