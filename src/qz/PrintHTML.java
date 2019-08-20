@@ -111,7 +111,7 @@ public class PrintHTML extends JFXPanel implements Printable {
     private String[] getHTMLDataArray() {
         return htmlData.get().split("(?i)</html>");
     }
-
+    
     //public String get() {
     //    return super.getText();
     //}
@@ -165,6 +165,8 @@ public class PrintHTML extends JFXPanel implements Printable {
         if (pageIndex > 0) {
             return (NO_SUCH_PAGE);
         }
+        
+        System.out.println("print: p-" + pageIndex + ",w-" + pf.getWidth() + ", h-" + pf.getHeight());
 
         boolean doubleBuffered = super.isDoubleBuffered();
         super.setDoubleBuffered(false);
