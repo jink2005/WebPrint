@@ -54,6 +54,7 @@ public class PrintHTML extends JFXPanel implements Printable {
     private final AtomicInteger orientation = new AtomicInteger(PageFormat.PORTRAIT);
     private final AtomicReference<String> htmlData = new AtomicReference<String>(null);
     //private final AtomicReference<Paper> paper = new AtomicReference<Paper>(null);
+    private final AtomicReference<Boolean> contentReady = new AtomicReference<Boolean>(false);
     private WebView webView = null;
 
     public PrintHTML() {
@@ -74,12 +75,7 @@ public class PrintHTML extends JFXPanel implements Printable {
                     public void changed(ObservableValue ov, State oldState, State newState) {
                         if (newState == State.SUCCEEDED) {
                             System.out.println("WebEngine state change SUCCEEDED.");
-                            PrintHTML printHtml = (PrintHTML)jfxPanel;
-                            try {
-                                printHtml.framePrint();
-                            } catch (PrinterException ex) {
-                                Logger.getLogger(PrintHTML.class.getName()).log(Level.SEVERE, null, ex);
-                            }
+                            contentReady.set(true);
                         }
                     }
                 });
@@ -124,6 +120,24 @@ public class PrintHTML extends JFXPanel implements Printable {
     //public String get() {
     //    return super.getText();
     //}
+    public void print() {
+        for (String s : getHTMLDataArray()) {
+            System.out.println("print load jxpanel content...");
+            contentReady.set(false);
+            jfxPanelWebViewLoadContent(this, s + "</html>");
+
+            try {
+                while (! contentReady.get()) {
+                    System.out.println("waiting content...");
+                    Thread.sleep(200);
+                }
+                framePrint();
+            } catch (PrinterException | InterruptedException ex) {
+                Logger.getLogger(PrintHTML.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
     private void framePrint() throws PrinterException {
         System.out.println("print begin ...");
         JFrame j = new JFrame(jobName.get());
@@ -154,13 +168,6 @@ public class PrintHTML extends JFXPanel implements Printable {
         System.out.println("print end.");
     }
 
-    public void print() {
-        for (String s : getHTMLDataArray()) {
-            System.out.println("print load jxpanel content...");
-            jfxPanelWebViewLoadContent(this, s + "</html>");
-        }
-    }
-
     public void setPrintParameters(PrintManager a) {
         this.ps.set(a.getPrintService());
         this.jobName.set(a.getJobName().replace(" ___ ", " HTML "));
@@ -187,7 +194,6 @@ public class PrintHTML extends JFXPanel implements Printable {
         super.setDoubleBuffered(false);
 
 //        pf.setOrientation(orientation.get());
-
         //Paper paper = new Paper();
         //paper.setSize(8.5 * 72, 11 * 72);
         //paper.setImageableArea(0, 0, paper.getWidth(), paper.getHeight());
