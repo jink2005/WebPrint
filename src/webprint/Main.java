@@ -1,6 +1,6 @@
 /**
  * This file is part of WebPrint
- * 
+ *
  * @author Michael Wallace
  *
  * Copyright (C) 2015 Michael Wallace, WallaceIT
@@ -20,12 +20,19 @@ package webprint;
 
 import dorkbox.systemTray.Menu;
 import dorkbox.systemTray.MenuItem;
+import dorkbox.systemTray.Separator;
 import dorkbox.systemTray.SystemTray;
+import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -37,7 +44,7 @@ import javax.swing.UnsupportedLookAndFeelException;
  * @author michael
  */
 public class Main extends javax.swing.JFrame {
-    
+
     private Server htserver;
     public AccessControl acl;
 
@@ -47,9 +54,10 @@ public class Main extends javax.swing.JFrame {
     public static void main(String[] args) {
         Main app = new Main();
     }
-    
+
     private final JFrame settingFrame;
-    public Main(){
+
+    public Main() {
         acl = new AccessControl();
         this.setName("WebPrint");
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(Main.class.getResource("img/webprinticonsmall.png")));
@@ -60,67 +68,67 @@ public class Main extends javax.swing.JFrame {
         settingFrame = new SettingsFrame(this);
         settingFrame.setLocationRelativeTo(null);
     }
-    
-    public static String getUserDataPath(){
+
+    public static String getUserDataPath() {
         String dataDirectory;
         //here, we assign the name of the OS, according to Java, to a variable...
         String OS = (System.getProperty("os.name")).toUpperCase();
         //to determine what the workingDirectory is.
         //if it is some version of Windows
-        if (OS.contains("WIN")){
+        if (OS.contains("WIN")) {
             //it is simply the location of the "AppData" folder
             dataDirectory = System.getenv("AppData");
-            dataDirectory+= "\\WebPrint\\";
+            dataDirectory += "\\WebPrint\\";
         } else {
             //Otherwise, we assume Linux or Mac
             //in either case, we would start in the user's home directory
             dataDirectory = System.getProperty("user.home");
             //if we are on a Mac, we are not done, we look for "Application Support"
-            if (OS.contains("MAC")){
+            if (OS.contains("MAC")) {
                 dataDirectory += "/Library/Application Support/WebPrint/";
             } else {
                 dataDirectory += "/.WebPrint/";
-            }    
+            }
         }
         File dir = new File(dataDirectory);
-        if (!dir.exists()){  // Checks that Directory/Folder Doesn't Exists!  
+        if (!dir.exists()) {  // Checks that Directory/Folder Doesn't Exists!  
             dir.mkdir();
         }
         System.out.println(dataDirectory);
         return dataDirectory;
     }
-    
-    private void startServer(){
+
+    private void startServer() {
         htserver = new Server(this);
     }
-    
-    public String getServerError(){
+
+    public String getServerError() {
         return htserver.error;
     }
 
     public void saveAddress(String address, int port) {
         htserver.saveAddress(address, port);
     }
-    
-    public String getAddress(){
+
+    public String getAddress() {
         return htserver.getAddress();
     }
-    
-    public int getPort(){
+
+    public int getPort() {
         return htserver.getPort();
     }
-    
-    public void showSettings(){
+
+    public void showSettings() {
         settingFrame.setVisible(true);
     }
-    
+
     // System tray stuff
     ButtonGroup traymgrp;
     TrayIcon trayIcon;
     SystemTray tray;
 
     private void initSystemTray() {
-        
+
         // Set app look and feel
         try {
             System.out.println("set system look and feel");
@@ -134,17 +142,30 @@ public class Main extends javax.swing.JFrame {
         if (tray == null) {
             throw new RuntimeException("Unable to load SystemTray!");
         }
-        
+
         tray.setImage(Main.class.getResource("img/webprinticonsmall.png"));
-        
+
         Menu mainMenu = tray.getMenu();
-        mainMenu.add(new MenuItem("Settings", new ActionListener() {
+        mainMenu.add(new MenuItem("关于(About)", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Desktop desktop = Desktop.getDesktop();
+                try {
+                    desktop.browse(new URI("http://www.lnnear.com"));
+                } catch (URISyntaxException | IOException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }));
+        mainMenu.add(new Separator());
+        mainMenu.add(new MenuItem("设置(Settings)", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showSettings();
             }
         }));
-        mainMenu.add(new MenuItem("Exit", new ActionListener() {
+        mainMenu.add(new Separator());
+        mainMenu.add(new MenuItem("退出(Exit)", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
