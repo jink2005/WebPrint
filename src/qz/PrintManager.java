@@ -160,14 +160,14 @@ public class PrintManager {
 
     public void appendHTMLFile(String url) throws IOException {
         try {
-            appendHTML(new String(FileUtilities.readRawFile(url), charset.name()));
+            setHTML(new String(FileUtilities.readRawFile(url), charset.name()));
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    public void appendHTML(String html) {
-        getPrintHTML().append(html);
+    
+    public void setHTML(String html) {
+        getPrintHTML().set(html);
     }
 
     /**

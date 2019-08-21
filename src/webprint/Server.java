@@ -285,7 +285,7 @@ class Server {
                                     }
                                 }
                                 if (action.equals("printhtml")) {
-                                    pManager.appendHTML(jrequest.getString("data"));
+                                    pManager.setHTML(jrequest.getString("data"));
                                     if (!pManager.printHTML(jrequest.getString("printer"))) {
                                         responseJson.put("error", "Failed to print: " + pManager.getException());
                                     }

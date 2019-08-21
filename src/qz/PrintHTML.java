@@ -56,11 +56,19 @@ public class PrintHTML extends JFXPanel implements Printable {
     //private final AtomicReference<Paper> paper = new AtomicReference<Paper>(null);
     private final AtomicReference<Boolean> contentReady = new AtomicReference<Boolean>(false);
     private WebView webView = null;
+    private JFrame j = null;
 
     public PrintHTML() {
         super();
         super.setOpaque(true);
         super.setBackground(Color.WHITE);
+        super.setBorder(null);
+        
+        j = new JFrame();
+        j.setUndecorated(true);
+//        j.setLayout(new FlowLayout());
+        j.add(this);
+        
         createJFXPanelWebViewScene(this);
     }
 
@@ -94,9 +102,9 @@ public class PrintHTML extends JFXPanel implements Printable {
             }
         });
     }
-
-    public void append(String html) {
-        htmlData.set(htmlData.get() == null ? html : htmlData.get() + html);
+    
+    public void set(String html) {
+        htmlData.set(html);
     }
 
     //public void append(String html) {
@@ -113,39 +121,28 @@ public class PrintHTML extends JFXPanel implements Printable {
         return htmlData.get();
     }
 
-    private String[] getHTMLDataArray() {
-        return htmlData.get().split("(?i)</html>");
-    }
-
     //public String get() {
     //    return super.getText();
     //}
     public void print() {
-        for (String s : getHTMLDataArray()) {
-            System.out.println("print load jxpanel content...");
-            contentReady.set(false);
-            jfxPanelWebViewLoadContent(this, s + "</html>");
+        System.out.println("print load jxpanel content...");
+        contentReady.set(false);
+        jfxPanelWebViewLoadContent(this, htmlData.get());
 
-            try {
-                while (! contentReady.get()) {
-                    System.out.println("waiting content...");
-                    Thread.sleep(200);
-                }
-                framePrint();
-            } catch (PrinterException | InterruptedException ex) {
-                Logger.getLogger(PrintHTML.class.getName()).log(Level.SEVERE, null, ex);
+        try {
+            while (!contentReady.get()) {
+                System.out.println("waiting content...");
+                Thread.sleep(200);
             }
+            framePrint();
+        } catch (PrinterException | InterruptedException ex) {
+            Logger.getLogger(PrintHTML.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private void framePrint() throws PrinterException {
         System.out.println("print begin ...");
-        JFrame j = new JFrame(jobName.get());
-        j.setUndecorated(true);
-        j.setLayout(new FlowLayout());
-        this.setBorder(null);
-
-        j.add(this);
+        j.setTitle(jobName.get());
 
         j.pack();
         j.setExtendedState(j.ICONIFIED);
