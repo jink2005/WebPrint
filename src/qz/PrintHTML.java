@@ -150,7 +150,7 @@ public class PrintHTML extends JFXPanel implements Printable {
 
         // Elimate any margins
         HashPrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
-        attr.add(new MediaPrintableArea(0f, 0f, getWidth() / 72f, getHeight() / 72f, MediaPrintableArea.INCH));
+        attr.add(new MediaPrintableArea(0f, 0f, getWidth() / 300f, getHeight() / 300f, MediaPrintableArea.INCH));
         System.out.println("print ...W-" + getWidth() + ",H-" + getHeight());
 
         PrinterJob job = PrinterJob.getPrinterJob();
