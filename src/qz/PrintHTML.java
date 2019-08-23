@@ -26,6 +26,7 @@ package qz;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
@@ -205,9 +206,14 @@ public class PrintHTML extends JFXPanel implements Printable {
         //pf.getPaper().setImageableArea(0, 0, paper.getWidth() + 200, paper.getHeight() + 200);
         //pf.getPaper().setImageableArea(-100, -100, 200, 200);
         Graphics2D g2d = (Graphics2D) g;
+        final AffineTransform trans = g2d.getDeviceConfiguration().getNormalizingTransform();
+        System.out.println(trans.getScaleX() * 72 + " DPI horizontally");
+        System.out.println(trans.getScaleY() * 72 + " DPI vertically");
+        
         g2d.translate(pf.getImageableX(), pf.getImageableY());
         //g2d.translate(paper.getImageableX(), paper.getImageableY());
-        g2d.scale(0.24, 0.24);
+        double dpiScale = trans.getScaleY() * 72 / 300.0;
+        g2d.scale(dpiScale, dpiScale);
         this.getParent().paint(g2d);
         super.setDoubleBuffered(doubleBuffered);
         return (PAGE_EXISTS);
