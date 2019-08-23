@@ -24,7 +24,6 @@
 package qz;
 
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.print.PageFormat;
@@ -44,7 +43,10 @@ import javafx.scene.web.WebView;
 import javafx.concurrent.Worker.State;
 import javax.print.PrintService;
 import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.standard.Fidelity;
 import javax.print.attribute.standard.MediaPrintableArea;
+import javax.print.attribute.standard.PrintQuality;
+import javax.print.attribute.standard.PrinterResolution;
 import javax.swing.JFrame;
 
 public class PrintHTML extends JFXPanel implements Printable {
@@ -63,12 +65,12 @@ public class PrintHTML extends JFXPanel implements Printable {
         super.setOpaque(true);
         super.setBackground(Color.WHITE);
         super.setBorder(null);
-        
+
         j = new JFrame();
         j.setUndecorated(true);
 //        j.setLayout(new FlowLayout());
         j.add(this);
-        
+
         createJFXPanelWebViewScene(this);
     }
 
@@ -102,7 +104,7 @@ public class PrintHTML extends JFXPanel implements Printable {
             }
         });
     }
-    
+
     public void set(String html) {
         htmlData.set(html);
     }
@@ -150,8 +152,11 @@ public class PrintHTML extends JFXPanel implements Printable {
 
         // Elimate any margins
         HashPrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
-        attr.add(new MediaPrintableArea(0f, 0f, getWidth() / 300f, getHeight() / 300f, MediaPrintableArea.INCH));
-        System.out.println("print ...W-" + getWidth() + ",H-" + getHeight());
+        attr.add(new PrinterResolution(300, 300, PrinterResolution.DPI));
+        attr.add(new MediaPrintableArea(0f, 0f, getWidth() / 72f, getHeight() / 72f, MediaPrintableArea.INCH));
+        attr.add(PrintQuality.HIGH);
+//        attr.add(Fidelity.FIDELITY_TRUE);
+        System.out.println("print ...W-" + getWidth() / 72f + ",H-" + getHeight() / 72f);
 
         PrinterJob job = PrinterJob.getPrinterJob();
         job.setPrintService(ps.get());
@@ -202,6 +207,7 @@ public class PrintHTML extends JFXPanel implements Printable {
         Graphics2D g2d = (Graphics2D) g;
         g2d.translate(pf.getImageableX(), pf.getImageableY());
         //g2d.translate(paper.getImageableX(), paper.getImageableY());
+        g2d.scale(0.24, 0.24);
         this.getParent().paint(g2d);
         super.setDoubleBuffered(doubleBuffered);
         return (PAGE_EXISTS);
