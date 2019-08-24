@@ -150,6 +150,13 @@ public class PrintHTML extends JFXPanel implements Printable {
      */
     private void fxWebEngingPrint() {
         javafx.print.PrinterJob job = javafx.print.PrinterJob.createPrinterJob();
+        
+        javafx.print.PageLayout defaultPageLayout = job.getPrinter().getDefaultPageLayout();
+        javafx.print.PageLayout newPageLayout = job.getPrinter().createPageLayout(defaultPageLayout.getPaper(), defaultPageLayout.getPageOrientation(), 5, 5, 5, 5);
+        
+        job.getJobSettings().setJobName(jobName.get());
+        job.getJobSettings().setPageLayout(newPageLayout);
+        
         if (job != null) {
             this.webView.getEngine().print(job);
             job.endJob();
