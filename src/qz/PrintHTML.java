@@ -137,12 +137,29 @@ public class PrintHTML extends JFXPanel implements Printable {
                 System.out.println("waiting content...");
                 Thread.sleep(200);
             }
-            framePrint();
-        } catch (PrinterException | InterruptedException ex) {
+            fxWebEngingPrint();
+//            framePrint();
+        } catch (Exception ex) {
             Logger.getLogger(PrintHTML.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
+    /**
+     * 使用JavaFx的WebEngine打印web完整内容
+     * 使用oracle java 8能正常打印，mac不行
+     */
+    private void fxWebEngingPrint() {
+        javafx.print.PrinterJob job = javafx.print.PrinterJob.createPrinterJob();
+        if (job != null) {
+            this.webView.getEngine().print(job);
+            job.endJob();
+        }
+    }
+    
+    /**
+     * 使用awt用打印控件图片的方式打印，只能打印jxpanel显示的部分，无法打印完整网页
+     * @throws PrinterException 
+     */
     private void framePrint() throws PrinterException {
         System.out.println("print begin ...");
         j.setTitle(jobName.get());
@@ -209,7 +226,7 @@ public class PrintHTML extends JFXPanel implements Printable {
         final AffineTransform trans = g2d.getDeviceConfiguration().getNormalizingTransform();
         System.out.println(trans.getScaleX() * 72 + " DPI horizontally");
         System.out.println(trans.getScaleY() * 72 + " DPI vertically");
-        
+
         g2d.translate(pf.getImageableX(), pf.getImageableY());
         //g2d.translate(paper.getImageableX(), paper.getImageableY());
         double dpiScale = trans.getScaleY() * 72 / 300.0;
