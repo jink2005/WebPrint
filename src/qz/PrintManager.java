@@ -1392,5 +1392,8 @@ public class PrintManager {
                 + paperSize.getUnitDescription() + "x"
                 + paperSize.getHeight() + paperSize.getUnitDescription());
     }
-
+    
+    public void setPrintPageSetting(PrintPageSetting pageSetting) {
+        getPrintHTML().setPrintPageSetting(pageSetting);
+    }
 }

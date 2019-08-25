@@ -42,6 +42,8 @@ import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.web.WebView;
 import javafx.concurrent.Worker.State;
+import javafx.print.PageOrientation;
+import javafx.print.Printer;
 import javax.print.PrintService;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.standard.Fidelity;
@@ -53,11 +55,17 @@ import javax.swing.JFrame;
 public class PrintHTML extends JFXPanel implements Printable {
 
     private final AtomicReference<PrintService> ps = new AtomicReference<PrintService>(null);
+    // 使用javafx的打印进行改造
+    private final AtomicReference<Printer> fxPrinter = new AtomicReference<Printer>(null);
+
     private final AtomicReference<String> jobName = new AtomicReference<String>("WebPrinter 2D Printing");
-    private final AtomicInteger orientation = new AtomicInteger(PageFormat.PORTRAIT);
     private final AtomicReference<String> htmlData = new AtomicReference<String>(null);
     //private final AtomicReference<Paper> paper = new AtomicReference<Paper>(null);
     private final AtomicReference<Boolean> contentReady = new AtomicReference<Boolean>(false);
+    
+    private final AtomicInteger orientation = new AtomicInteger(PageFormat.PORTRAIT);
+    private final AtomicReference<PrintPageSetting> printPageSetting = new AtomicReference<PrintPageSetting>(null);
+
     private WebView webView = null;
     private JFrame j = null;
 
@@ -143,29 +151,48 @@ public class PrintHTML extends JFXPanel implements Printable {
             Logger.getLogger(PrintHTML.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     /**
-     * 使用JavaFx的WebEngine打印web完整内容
-     * 使用oracle java 8能正常打印，mac不行
+     * 使用JavaFx的WebEngine打印web完整内容 使用oracle java 8能正常打印，mac不行
      */
     private void fxWebEngingPrint() {
-        javafx.print.PrinterJob job = javafx.print.PrinterJob.createPrinterJob();
-        
-        javafx.print.PageLayout defaultPageLayout = job.getPrinter().getDefaultPageLayout();
-        javafx.print.PageLayout newPageLayout = job.getPrinter().createPageLayout(defaultPageLayout.getPaper(), defaultPageLayout.getPageOrientation(), 5, 5, 5, 5);
-        
-        job.getJobSettings().setJobName(jobName.get());
-        job.getJobSettings().setPageLayout(newPageLayout);
-        
-        if (job != null) {
-            this.webView.getEngine().print(job);
-            job.endJob();
+        javafx.print.PrinterJob printerJob = null;
+        if (null != fxPrinter.get()) {
+            printerJob = javafx.print.PrinterJob.createPrinterJob(fxPrinter.get());
+        } else {
+            printerJob = javafx.print.PrinterJob.createPrinterJob();
+        }
+
+        if (null != printPageSetting.get()) {
+            javafx.print.PageLayout defaultPageLayout = printerJob.getPrinter().getDefaultPageLayout();
+            if (null == printPageSetting.get().getLeftMargin()) {
+                printPageSetting.get().setLeftMargin(defaultPageLayout.getLeftMargin());
+            }
+            if (null == printPageSetting.get().getRightMargin()) {
+                printPageSetting.get().setRightMargin(defaultPageLayout.getRightMargin());
+            }
+            if (null == printPageSetting.get().getTopMargin()) {
+                printPageSetting.get().setTopMargin(defaultPageLayout.getTopMargin());
+            }
+            if (null == printPageSetting.get().getBottomMargin()) {
+                printPageSetting.get().setBottomMargin(defaultPageLayout.getBottomMargin());
+            }
+            
+            javafx.print.PageLayout newPageLayout = printerJob.getPrinter().createPageLayout(defaultPageLayout.getPaper(), defaultPageLayout.getPageOrientation(), printPageSetting.get().getLeftMargin(), printPageSetting.get().getRightMargin(), printPageSetting.get().getTopMargin(), printPageSetting.get().getBottomMargin());
+            printerJob.getJobSettings().setPageLayout(newPageLayout);
+        }
+
+        printerJob.getJobSettings().setJobName(jobName.get());
+        if (printerJob != null) {
+            this.webView.getEngine().print(printerJob);
+            printerJob.endJob();
         }
     }
-    
+
     /**
      * 使用awt用打印控件图片的方式打印，只能打印jxpanel显示的部分，无法打印完整网页
-     * @throws PrinterException 
+     *
+     * @throws PrinterException
      */
     private void framePrint() throws PrinterException {
         System.out.println("print begin ...");
@@ -202,6 +229,10 @@ public class PrintHTML extends JFXPanel implements Printable {
 
     public void setPrintService(PrintService ps) {
         this.ps.set(ps);
+    }
+
+    public void setPrinter(Printer selectedPrinter) {
+        this.fxPrinter.set(selectedPrinter);
     }
 
     public int print(Graphics g, PageFormat pf, int pageIndex) throws PrinterException {
@@ -241,5 +272,9 @@ public class PrintHTML extends JFXPanel implements Printable {
         this.getParent().paint(g2d);
         super.setDoubleBuffered(doubleBuffered);
         return (PAGE_EXISTS);
+    }
+    
+    public void setPrintPageSetting(PrintPageSetting pageSetting) {
+        printPageSetting.set(pageSetting);
     }
 }

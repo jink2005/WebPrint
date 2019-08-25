@@ -18,6 +18,7 @@
  */
 package webprint;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -63,6 +64,7 @@ import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 import qz.PrintManager;
+import qz.PrintRequest;
 import qz.PrintServiceMatcher;
 import qz.exception.NullPrintServiceException;
 import qz.json.JSONArray;
@@ -92,12 +94,13 @@ class Server {
         } catch (IOException ex) {
             error = ex.getMessage();
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(jframe, "Error starting server: "+error);
+            JOptionPane.showMessageDialog(jframe, "Error starting server: " + error);
         }
     }
-    
+
     static String fileloc = Main.getUserDataPath() + "webprint.config";
-    private void loadConfig(){
+
+    private void loadConfig() {
         File f = new File(fileloc);
         if (f.exists() && !f.isDirectory()) {
             String content;
@@ -111,12 +114,13 @@ class Server {
             }
         }
     }
-    private void saveConfig(){
+
+    private void saveConfig() {
         FileWriter fw = null;
         try {
             File newTextFile = new File(fileloc);
             fw = new FileWriter(newTextFile);
-            fw.write(address+":"+port);
+            fw.write(address + ":" + port);
             fw.close();
         } catch (IOException ex) {
             Logger.getLogger(AccessControl.class.getName()).log(Level.SEVERE, null, ex);
@@ -128,32 +132,35 @@ class Server {
             }
         }
     }
+
     static String readFile(String path, Charset encoding)
             throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, encoding);
     }
-    
-    public String getAddress(){
+
+    public String getAddress() {
         return address;
     }
-    
-    public int getPort(){
+
+    public int getPort() {
         return port;
     }
-    
-    public final void start() throws IOException{
+
+    public final void start() throws IOException {
         thread = new RequestListenerThread(address, port, this);
         thread.setDaemon(false);
         thread.start();
         System.out.println("Server started");
     }
-    
+
     public void saveAddress(String address, int port) {
-        if (address!=null)
+        if (address != null) {
             this.address = address;
-        if (port>1)
+        }
+        if (port > 1) {
             this.port = port;
+        }
         saveConfig();
     }
 
@@ -179,7 +186,7 @@ class Server {
             super();
             context = cont;
             pManager = new PrintManager();
-            
+
         }
 
         @Override
@@ -212,15 +219,18 @@ class Server {
                     System.out.println(entityContent);
                     // parse json and get request
                     JSONObject jrequest = new JSONObject(entityContent);
-                    String action = jrequest.getString("a");
+                    // 使用Jackson处理
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    PrintRequest printRequest = objectMapper.readValue(entityContent, PrintRequest.class);
+                    String action = printRequest.getA();
                     // Perform authentication using provided cookie & origin
-                    if (!jrequest.has("origin")) {
+                    if (null == printRequest.getOrigin()) {
                         responseJson.put("error", "Invalid authentication credentials provided.");
                     } else {
-                        String origin = jrequest.getString("origin");
+                        String origin = printRequest.getOrigin();
                         String cookie = "";
-                        if (jrequest.has("cookie")) {
-                            cookie = jrequest.getString("cookie");
+                        if (null != printRequest.getCookie()) {
+                            cookie = printRequest.getCookie();
                         }
                         if (action.equals("init")) {
                             if (!app.acl.isAllowed(origin, cookie)) {
@@ -255,44 +265,45 @@ class Server {
                                     responseJson.put("ports", jportArray);
                                 }
                                 if (action.equals("openport")) {
-                                    if (!pManager.openPortWithProperties(jrequest.getString("port"), jrequest.getJSONObject("settings"))) {
+                                    if (!pManager.openPortWithProperties(printRequest.getPort(), jrequest.getJSONObject("settings"))) {
                                         responseJson.put("error", "Could not open serial port: " + pManager.getException());
                                     }
                                 }
                                 if (action.equals("printraw")) {
-                                    if (jrequest.has("printer")) {
-                                        pManager.append64(jrequest.getString("data"));
-                                        if (!pManager.printRaw(jrequest.getString("printer"))) {
+                                    if (null != printRequest.getPrinter()) {
+                                        pManager.append64(printRequest.getData());
+                                        if (!pManager.printRaw(printRequest.getPrinter())) {
                                             responseJson.put("error", "Failed to print: " + pManager.getException());
                                         }
-                                    } else if (jrequest.has("port")) {
-                                        if (!pManager.send(jrequest.getString("port"), jrequest.getString("data"))) {
+                                    } else if (null != printRequest.getPort()) {
+                                        if (!pManager.send(printRequest.getPort(), printRequest.getData())) {
                                             //System.out.println(jrequest.getString("port"));
                                             responseJson.put("error", "Failed to print: " + pManager.getException());
                                         }
                                     } else if (jrequest.has("socket")) {
-                                        pManager.append64(jrequest.getString("data"));
+                                        pManager.append64(printRequest.getData());
                                         String[] parts = jrequest.getString("socket").split(":");
                                         try {
                                             pManager.printToHost(parts[0], parts[1]);
                                         } catch (NumberFormatException | IOException | NullPrintServiceException ex) {
                                             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                                                //System.out.println(jrequest.getString("socket"));
+                                            //System.out.println(jrequest.getString("socket"));
                                             responseJson.put("error", "Failed to print: " + ex.getMessage());
-                                        }    
+                                        }
                                     } else {
                                         responseJson.put("error", "No printer specified in the request.");
                                     }
                                 }
                                 if (action.equals("printhtml")) {
-                                    pManager.setHTML(jrequest.getString("data"));
-                                    if (!pManager.printHTML(jrequest.getString("printer"))) {
+                                    pManager.setPrintPageSetting(printRequest.getPageSetting());
+                                    pManager.setHTML(printRequest.getData());
+                                    if (!pManager.printHTML(printRequest.getPrinter())) {
                                         responseJson.put("error", "Failed to print: " + pManager.getException());
                                     }
                                 }
                                 System.out.println(action);
                             } else {
-                                responseJson.put("error", origin+" has not been allowed access to web print yet.\nTry refreshing the page.");
+                                responseJson.put("error", origin + " has not been allowed access to web print yet.\nTry refreshing the page.");
                             }
                         }
                     }

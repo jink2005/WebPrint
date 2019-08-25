@@ -16,7 +16,13 @@
         <dependency org="com.google.inject" name="guice" rev="3.0" transitive="false" conf="compile->default"/>
         <dependency org="org.apache.httpcomponents" name="httpcore" rev="latest.release" conf="compile->default"/>
         <dependency org="com.googlecode.json-simple" name="json-simple" rev="latest.release" conf="compile->default"/>
-        
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+        <dependency org="com.fasterxml.jackson.core" name="jackson-core" rev="latest.release" conf="compile->default"/>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+        <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="latest.release" conf="compile->default"/>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+        <dependency org="com.fasterxml.jackson.core" name="jackson-annotations" rev="latest.release" conf="compile->default"/>
+
         <dependency org="NA" name="jssc_qz" rev="" conf="compile->default"/>
         <dependency org="NA" name="pdf-renderer_qz" rev="" conf="compile->default"/>
     </dependencies>

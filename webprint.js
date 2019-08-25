@@ -1,6 +1,6 @@
 /**
  * This file is part of WebPrint
- * 
+ *
  * @author Michael Wallace
  *
  * Copyright (C) 2015 Michael Wallace, WallaceIT
@@ -42,19 +42,19 @@ var WebPrint = function (init, opt) {
         var request = {a: "printraw", port: port, data: BASE64.encode(data)};
         sendAppletRequest(request);
     };
-    
+
     this.printTcp = function (data, socket) {
         // var request = {a: "printraw", socket: socket, data: btoa(data)};
         var request = {a: "printraw", socket: socket, data: BASE64.encode(data)};
         sendAppletRequest(request);
     };
 
-    this.printHtml = function (data, printer) {
+    this.printHtml = function (data, printer, pageSetting) {
         if (isAndroid){
             alert("HTML printing is not available in Android.");
             return;
         }
-        var request = {a: "printhtml", printer: printer, data: data};
+        var request = {a: "printhtml", printer: printer, data: data, pageSetting: pageSetting};
         sendAppletRequest(request);
     };
     /*
@@ -80,7 +80,7 @@ var WebPrint = function (init, opt) {
         data.cookie = cookie;
         if (!wpwindow || wpwindow.closed || !wpready) {
             if (wpready){
-               openPrintWindow();
+                openPrintWindow();
             } else {
                 retry = true;
                 checkRelay();
@@ -206,7 +206,7 @@ var WebPrint = function (init, opt) {
 
         window.location = "webprint://open";
     }
-    
+
     var cookie = localStorage.getItem("webprint_auth");
     if (cookie==null){
         cookie = "";
@@ -215,6 +215,6 @@ var WebPrint = function (init, opt) {
     var isAndroid = navigator.appVersion.indexOf("Android")!=-1;
 
     if (init) checkRelay();
-    
+
     return this;
 };
