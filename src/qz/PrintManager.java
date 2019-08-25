@@ -1,6 +1,6 @@
 /**
  * This file is part of WebPrint
- * 
+ *
  * @author Michael Wallace
  *
  * Copyright (C) 2015 Michael Wallace, WallaceIT
@@ -32,6 +32,8 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.ObservableSet;
+import javafx.print.Printer;
 import javax.imageio.ImageIO;
 import javax.print.PrintException;
 import javax.print.PrintService;
@@ -62,6 +64,7 @@ public class PrintManager {
     public static final String VERSION = "1.8.0";
 
     private PrintService ps;
+    private Printer fxPrinter;
     private PrintRaw printRaw;
     private SerialIO serialIO;
     private PrintPostScript printPS;
@@ -165,7 +168,7 @@ public class PrintManager {
             Logger.getLogger(PrintManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public void setHTML(String html) {
         getPrintHTML().set(html);
     }
@@ -518,7 +521,7 @@ public class PrintManager {
      public void setPSMargin(double top, double left, double bottom, double right) {
      this.psMargin = new double[]{top, left, bottom, right};
      }*/
-    /*
+ /*
      // Due to applet security, can only be invoked by run() thread
      private String readRawFile() {
      String rawData = "";
@@ -695,10 +698,19 @@ public class PrintManager {
     public void clear() {
         getPrintRaw().clear();
     }
-    
-    private boolean checkPrinterConnection(String printer){
-        if (this.printer==null || !this.printer.equals(printer)){
-            if (!setPrinter(printer)){
+
+    private boolean checkPrinterConnection(String printer) {
+        if (this.printer == null || !this.printer.equals(printer)) {
+            if (!setPrinter(printer)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkFxPrinterConnection(String printer) {
+        if (this.printer == null || !this.printer.equals(printer)) {
+            if (!setFxPrinter(printer)) {
                 return false;
             }
         }
@@ -706,7 +718,7 @@ public class PrintManager {
     }
 
     public boolean printHTML(String printer) {
-        if (!checkPrinterConnection(printer)){
+        if (!checkFxPrinterConnection(printer)) {
             return false;
         }
         try {
@@ -720,7 +732,7 @@ public class PrintManager {
     }
 
     public boolean printPS(String printer) {
-        if (!checkPrinterConnection(printer)){
+        if (!checkPrinterConnection(printer)) {
             return false;
         }
         try {
@@ -734,7 +746,7 @@ public class PrintManager {
     }
 
     public boolean printRaw(String printer) {
-        if (!checkPrinterConnection(printer)){
+        if (!checkPrinterConnection(printer)) {
             return false;
         }
         try {
@@ -770,12 +782,13 @@ public class PrintManager {
         }
         return false;
     }
-    
+
     /**
      * Creates the print service by iterating through printers until finding
      * matching printer containing "printerName" in its description
+     *
      * @param printer
-     * @return 
+     * @return
      */
     public boolean setPrinter(String printer) {
         PrintService pservice = PrintServiceMatcher.findPrinter(printer);
@@ -784,6 +797,17 @@ public class PrintManager {
         }
         this.printer = printer;
         PrintManager.this.setPrintService(pservice);
+        return true;
+    }
+    
+    public boolean setFxPrinter(String printerName) {
+        Printer printer = PrinterMatcher.findPrinter(printerName);
+        if (printer == null) {
+            return false;
+        }
+        this.fxPrinter = printer;
+        printHTML.setPrinter(this.fxPrinter);
+        
         return true;
     }
 
@@ -825,7 +849,7 @@ public class PrintManager {
         try {
             // if port is not open or targering a different port, try to connect it
             if (!getSerialIO().isOpen() || !getSerialIO().getPortName().equals(portName)) {
-                if (!this.openPort(portName, false)){
+                if (!this.openPort(portName, false)) {
                     return false;
                 }
             }
@@ -892,9 +916,10 @@ public class PrintManager {
     }
 
     JSONObject portSettings = null;
+
     public boolean openPortWithProperties(String serialPortName, JSONObject portSettings) {
         this.portSettings = portSettings;
-        if (!this.openPort(serialPortName, false)){
+        if (!this.openPort(serialPortName, false)) {
             return false;
         }
         return true;
@@ -919,7 +944,7 @@ public class PrintManager {
 
     public boolean openPort(String serialPortName, boolean autoSetSerialProperties) {
         // check if port is already open
-        if (this.serialPortName != null){
+        if (this.serialPortName != null) {
             this.closeCurrentPort();
         }
         this.serialPortName = serialPortName;
@@ -927,11 +952,13 @@ public class PrintManager {
         try {
             System.out.println(serialPortName);
             getSerialIO().open(serialPortName);
-            if (portSettings!=null){
+            if (portSettings != null) {
                 getSerialIO().setProperties(portSettings.getString("baud"), portSettings.getString("databits"), portSettings.getString("stopbits"), portSettings.getString("parity"), portSettings.getString("flow"));
             } else {
                 if (autoSetSerialProperties) // Currently a Windows-only feature
+                {
                     getSerialIO().autoSetProperties();
+                }
             }
             return true;
         } catch (SerialPortException | JSONException | IOException | SerialException t) {
@@ -995,7 +1022,7 @@ public class PrintManager {
     /* public String getIPAddresses(String macAddress) {
      return getNetworkHashMap().get(macAddress).getInetAddressesCSV();
      }*/
-    /*public String getIpAddresses() {
+ /*public String getIpAddresses() {
      return getIpAddresses();
      }*/
     public String getIP() {
@@ -1131,7 +1158,7 @@ public class PrintManager {
     public String getVersion() {
         return VERSION;
     }
-    
+
     public String getEndOfDocument() {
         return endOfDocument;
     }
@@ -1166,7 +1193,7 @@ public class PrintManager {
             printRaw.setPrintService(ps);
         }
     }
-
+    
     public int getDocumentsPerSpool() {
         return documentsPerSpool;
     }
@@ -1392,7 +1419,7 @@ public class PrintManager {
                 + paperSize.getUnitDescription() + "x"
                 + paperSize.getHeight() + paperSize.getUnitDescription());
     }
-    
+
     public void setPrintPageSetting(PrintPageSetting pageSetting) {
         getPrintHTML().setPrintPageSetting(pageSetting);
     }
