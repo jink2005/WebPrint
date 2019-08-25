@@ -1,27 +1,26 @@
 /**
  * @author Tres Finocchiaro
- * 
+ *
  * Copyright (C) 2013 Tres Finocchiaro, QZ Industries
  *
  * IMPORTANT:  This software is dual-licensed
- * 
+ *
  * LGPL 2.1
- * This is free software.  This software and source code are released under 
- * the "LGPL 2.1 License".  A copy of this license should be distributed with 
+ * This is free software.  This software and source code are released under
+ * the "LGPL 2.1 License".  A copy of this license should be distributed with
  * this software. http://www.gnu.org/licenses/lgpl-2.1.html
- * 
+ *
  * QZ INDUSTRIES SOURCE CODE LICENSE
- * This software and source code *may* instead be distributed under the 
- * "QZ Industries Source Code License", available by request ONLY.  If source 
+ * This software and source code *may* instead be distributed under the
+ * "QZ Industries Source Code License", available by request ONLY.  If source
  * code for this project is to be made proprietary for an individual and/or a
  * commercial entity, written permission via a copy of the "QZ Industries Source
- * Code License" must be obtained first.  If you've obtained a copy of the 
- * proprietary license, the terms and conditions of the license apply only to 
+ * Code License" must be obtained first.  If you've obtained a copy of the
+ * proprietary license, the terms and conditions of the license apply only to
  * the licensee identified in the agreement.  Only THEN may the LGPL 2.1 license
  * be voided.
- * 
+ *
  */
-
 package qz;
 
 import java.util.Objects;
@@ -38,9 +37,11 @@ public class PrinterMatcher {
 
     /**
      * Finds a printer in the PrintServices listing and returns it's respective
-     * PrintService.<p>  If a PrintService is supplied, the same PrintService is
-     * returned.  If an Object is supplied, it calls the "toString()" method and
-     * then does a standard name search.</p>
+     * PrintService.<p>
+     * If a PrintService is supplied, the same PrintService is returned. If an
+     * Object is supplied, it calls the "toString()" method and then does a
+     * standard name search.</p>
+     *
      * @param o The object holding the name of the printer to search for.
      * @return PrintService ps for RawPrint(ps, cmds)
      */
@@ -48,7 +49,7 @@ public class PrinterMatcher {
         Printer exact = null;
         Printer begins = null;
         Printer partial = null;
-      
+
         String printerName;
         if (o == null) {
             return null;
@@ -60,16 +61,20 @@ public class PrinterMatcher {
             printerName = "\\Q" + o.toString() + "\\E";
         }
 
+        LogIt.log(Level.INFO, "Printer specified: " + printerName);
         // Get print service list
         getPrinterList();
+        if (null == printers) {
+            LogIt.log(Level.INFO, "Not found attached printers.");
+            return null;
+        }
 
         LogIt.log(Level.INFO, "Found " + printers.size() + " attached printers.");
-        LogIt.log(Level.INFO, "Printer specified: " + printerName);
 
         Pattern p1 = Pattern.compile("\\b" + printerName + "\\b", Pattern.CASE_INSENSITIVE);
         Pattern p2 = Pattern.compile("\\b" + printerName, Pattern.CASE_INSENSITIVE);
         Pattern p3 = Pattern.compile(printerName, Pattern.CASE_INSENSITIVE);
-        
+
         // Search for best match by name
         for (Printer printer : printers) {
             String sysPrinter = printer.getName();
@@ -89,7 +94,7 @@ public class PrinterMatcher {
                 LogIt.log("Printer name partial match: " + sysPrinter);
             }
         }
-        
+
         // Return closest match
         if (exact != null) {
             LogIt.log("Using best match: " + exact.getName());
@@ -112,13 +117,17 @@ public class PrinterMatcher {
     }
 
     public static ObservableSet<Printer> getPrinterArray(boolean forceSearch) {
-        ObservableSet<Printer> printers = Printer.getAllPrinters();
-        printerListing = "";
-        for (Printer printer : printers) {
-            if (! Objects.equals(printerListing, "")) {
-                printerListing = printerListing + ",";
+        if (forceSearch || printers == null || printers.size() == 0) {
+            ObservableSet<Printer> printerSet = Printer.getAllPrinters();
+            printerListing = "";
+            for (Printer printer : printerSet) {
+                if (!Objects.equals(printerListing, "")) {
+                    printerListing = printerListing + ",";
+                }
+                printerListing = printerListing + printer.getName();
             }
-            printerListing = printerListing + printer.getName();
+            printers = printerSet;
+            LogIt.log("PrinterListing(" + printers.size() + "): " + printerListing);
         }
         
         return printers;
@@ -126,6 +135,7 @@ public class PrinterMatcher {
 
     /**
      * Returns a CSV format of printer names, convenient for JavaScript
+     *
      * @return
      */
     public static String getPrinterListing() {
