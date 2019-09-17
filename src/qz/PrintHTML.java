@@ -23,6 +23,7 @@
  */
 package qz;
 
+import com.sun.javafx.print.Units;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -31,6 +32,7 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.lang.reflect.Constructor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -42,11 +44,12 @@ import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.web.WebView;
 import javafx.concurrent.Worker.State;
+import javafx.print.PageLayout;
 import javafx.print.PageOrientation;
+import javafx.print.Paper;
 import javafx.print.Printer;
 import javax.print.PrintService;
 import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.standard.Fidelity;
 import javax.print.attribute.standard.MediaPrintableArea;
 import javax.print.attribute.standard.PrintQuality;
 import javax.print.attribute.standard.PrinterResolution;
@@ -62,7 +65,7 @@ public class PrintHTML extends JFXPanel implements Printable {
     private final AtomicReference<String> htmlData = new AtomicReference<String>(null);
     //private final AtomicReference<Paper> paper = new AtomicReference<Paper>(null);
     private final AtomicReference<Boolean> contentReady = new AtomicReference<Boolean>(false);
-    
+
     private final AtomicInteger orientation = new AtomicInteger(PageFormat.PORTRAIT);
     private final AtomicReference<PrintPageSetting> printPageSetting = new AtomicReference<PrintPageSetting>(null);
 
@@ -159,27 +162,61 @@ public class PrintHTML extends JFXPanel implements Printable {
         javafx.print.PrinterJob printerJob = null;
         if (null != fxPrinter.get()) {
             printerJob = javafx.print.PrinterJob.createPrinterJob(fxPrinter.get());
+            System.out.println("fxPrinter: " + fxPrinter.get().getName());
         } else {
             printerJob = javafx.print.PrinterJob.createPrinterJob();
+            System.out.println("fxPrinter not selected");
         }
 
         if (null != printPageSetting.get()) {
-            javafx.print.PageLayout defaultPageLayout = printerJob.getPrinter().getDefaultPageLayout();
+            PageLayout defaultPageLayout = null;
+            Paper paper = null;
+            try {
+                defaultPageLayout = printerJob.getPrinter().getDefaultPageLayout();
+                paper = defaultPageLayout.getPaper();
+                
+                System.out.println("defaultPageLayout: " + defaultPageLayout.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (null != printPageSetting.get().getWidth() && null != printPageSetting.get().getHeight()) {
+                Constructor<Paper> c;
+                try {
+                    c = Paper.class.getDeclaredConstructor(String.class, double.class, double.class, Units.class);
+                    c.setAccessible(true);
+                    paper = c.newInstance(printPageSetting.get().getWidth() + "x" + printPageSetting.get().getHeight(), printPageSetting.get().getWidth(), printPageSetting.get().getHeight(), Units.MM);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            if (null == paper) {
+                System.out.println("paper is null or width or height need to set.");
+                return;
+            }
+
             if (null == printPageSetting.get().getLeftMargin()) {
-                printPageSetting.get().setLeftMargin(defaultPageLayout.getLeftMargin());
+                printPageSetting.get().setLeftMargin(null != defaultPageLayout ? defaultPageLayout.getLeftMargin() : 0);
             }
             if (null == printPageSetting.get().getRightMargin()) {
-                printPageSetting.get().setRightMargin(defaultPageLayout.getRightMargin());
+                printPageSetting.get().setRightMargin(null != defaultPageLayout ? defaultPageLayout.getRightMargin() : 0);
             }
             if (null == printPageSetting.get().getTopMargin()) {
-                printPageSetting.get().setTopMargin(defaultPageLayout.getTopMargin());
+                printPageSetting.get().setTopMargin(null != defaultPageLayout ? defaultPageLayout.getTopMargin() : 0);
             }
             if (null == printPageSetting.get().getBottomMargin()) {
-                printPageSetting.get().setBottomMargin(defaultPageLayout.getBottomMargin());
+                printPageSetting.get().setBottomMargin(null != defaultPageLayout ? defaultPageLayout.getBottomMargin() : 0);
             }
+
+            System.out.println("printPageSetting: " + printPageSetting.get().getLeftMargin() + ", " + printPageSetting.get().getRightMargin() + ", " + printPageSetting.get().getTopMargin() + ", " + printPageSetting.get().getBottomMargin());
+
+            PageLayout newPageLayout = printerJob.getPrinter().createPageLayout(paper, null != defaultPageLayout ? defaultPageLayout.getPageOrientation() : PageOrientation.PORTRAIT, printPageSetting.get().getLeftMargin(), printPageSetting.get().getRightMargin(), printPageSetting.get().getTopMargin(), printPageSetting.get().getBottomMargin());
+            System.out.println("newPageLayout: " + newPageLayout.toString());
             
-            javafx.print.PageLayout newPageLayout = printerJob.getPrinter().createPageLayout(defaultPageLayout.getPaper(), defaultPageLayout.getPageOrientation(), printPageSetting.get().getLeftMargin(), printPageSetting.get().getRightMargin(), printPageSetting.get().getTopMargin(), printPageSetting.get().getBottomMargin());
             printerJob.getJobSettings().setPageLayout(newPageLayout);
+        } else {
+            System.out.println("no need to set PageLayout");
         }
 
         printerJob.getJobSettings().setJobName(jobName.get());
@@ -273,7 +310,7 @@ public class PrintHTML extends JFXPanel implements Printable {
         super.setDoubleBuffered(doubleBuffered);
         return (PAGE_EXISTS);
     }
-    
+
     public void setPrintPageSetting(PrintPageSetting pageSetting) {
         printPageSetting.set(pageSetting);
     }
