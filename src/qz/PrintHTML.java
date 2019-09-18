@@ -195,6 +195,8 @@ public class PrintHTML extends JFXPanel implements Printable {
                 System.out.println("paper is null or width or height need to set.");
                 return;
             }
+            
+            System.out.println("paper: " + paper.toString());
 
             if (null == printPageSetting.get().getLeftMargin()) {
                 printPageSetting.get().setLeftMargin(null != defaultPageLayout ? defaultPageLayout.getLeftMargin() : 0);
