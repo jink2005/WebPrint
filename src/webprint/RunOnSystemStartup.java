@@ -83,7 +83,7 @@ public class RunOnSystemStartup {
     public static void install() throws Exception {
         File startupFile=getStartupFile();
         if (osName.startsWith("Windows")) {
-            String exePath = URLDecoder.decode(getProgramPath(), "UTF-8")+fileSeparator+appName+".exe";
+            String exePath = URLDecoder.decode(getProgramPath(), "UTF-8")+fileSeparator+appName+".jar";
             ShellLink link = ShellLink.createLink(exePath);
             link.setIconLocation(exePath);
             link.saveTo(startupFile.getPath());
