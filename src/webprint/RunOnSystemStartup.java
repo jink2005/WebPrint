@@ -83,7 +83,7 @@ public class RunOnSystemStartup {
     public static void install() throws Exception {
         File startupFile=getStartupFile();
         if (osName.startsWith("Windows")) {
-            String exePath = URLDecoder.decode(getProgramPath(), "UTF-8")+fileSeparator+appName+".jar";
+            String exePath = URLDecoder.decode(getProgramPath(), "UTF-8")+fileSeparator+appName+".bat";
             ShellLink link = ShellLink.createLink(exePath);
             link.setIconLocation(exePath);
             link.saveTo(startupFile.getPath());
@@ -106,7 +106,7 @@ public class RunOnSystemStartup {
                 out.println("</plist>");
             }*/
         } else if (osName.startsWith("Linux")) {
-            Files.copy(new File(getProgramPath()+"/"+appName+".desktop").toPath(), startupFile.toPath());
+            Files.copy(new File(getProgramPath()+"/"+appName+".sh").toPath(), startupFile.toPath());
         } else {
             throw new Exception("Unknown Operating System Name \""+osName+"\"");
         }
