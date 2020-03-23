@@ -56,6 +56,7 @@ public class Main extends javax.swing.JFrame {
     }
 
     private final JFrame settingFrame;
+    private final JFrame printersFrame;
 
     public Main() {
         acl = new AccessControl();
@@ -67,6 +68,8 @@ public class Main extends javax.swing.JFrame {
         startServer();
         settingFrame = new SettingsFrame(this);
         settingFrame.setLocationRelativeTo(null);
+        printersFrame = new PrintersFrame();
+        printersFrame.setLocationRelativeTo(null);
     }
 
     public static String getUserDataPath() {
@@ -121,6 +124,10 @@ public class Main extends javax.swing.JFrame {
     public void showSettings() {
         settingFrame.setVisible(true);
     }
+    
+    public void showPrinters() {
+        printersFrame.setVisible(true);
+    }
 
     // System tray stuff
     ButtonGroup traymgrp;
@@ -162,6 +169,12 @@ public class Main extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showSettings();
+            }
+        }));
+        mainMenu.add(new MenuItem("打印机(Printers)", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showPrinters();
             }
         }));
         mainMenu.add(new Separator());
