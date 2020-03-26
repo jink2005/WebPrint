@@ -2,14 +2,14 @@
  * This file is part of WebPrint
  *
  * @author Michael Wallace
- *
+ * <p>
  * Copyright (C) 2015 Michael Wallace, WallaceIT
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the GNU Lesser General Public License (LGPL)
  * version 2.1 which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/lgpl-2.1.html
- *
+ * <p>
  * This software is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
@@ -19,11 +19,28 @@
 package webprint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InterruptedIOException;
+import org.apache.http.*;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.apache.http.impl.DefaultHttpResponseFactory;
+import org.apache.http.impl.DefaultHttpServerConnection;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.SyncBasicHttpParams;
+import org.apache.http.protocol.*;
+import qz.PrintManager;
+import qz.PrintRequest;
+import qz.PrintServiceMatcher;
+import qz.exception.NullPrintServiceException;
+import qz.json.JSONArray;
+import qz.json.JSONObject;
+import webprint.ocxprint.JacobActiveX;
+import webprint.ocxprint.OcxData;
+
+import javax.swing.*;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -34,47 +51,12 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import org.apache.http.ConnectionClosedException;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.HttpServerConnection;
-import org.apache.http.MethodNotSupportedException;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.impl.DefaultHttpResponseFactory;
-import org.apache.http.impl.DefaultHttpServerConnection;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.SyncBasicHttpParams;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpProcessor;
-import org.apache.http.protocol.HttpRequestHandler;
-import org.apache.http.protocol.HttpRequestHandlerRegistry;
-import org.apache.http.protocol.HttpService;
-import org.apache.http.protocol.ImmutableHttpProcessor;
-import org.apache.http.protocol.ResponseConnControl;
-import org.apache.http.protocol.ResponseContent;
-import org.apache.http.protocol.ResponseDate;
-import org.apache.http.protocol.ResponseServer;
-import qz.PrintManager;
-import qz.PrintRequest;
-import qz.PrintServiceMatcher;
-import qz.exception.NullPrintServiceException;
-import qz.json.JSONArray;
-import qz.json.JSONObject;
 
 /**
- *
  * @author michael
  */
 class Server {
+    static String fileloc = Main.getUserDataPath() + "webprint.config";
 
     private Main app;
     private RequestListenerThread thread;
@@ -85,10 +67,13 @@ class Server {
 
     public Server(Main app) {
         this.app = app;
+
         jframe = new JFrame();
         jframe.setAlwaysOnTop(true);
         jframe.setAutoRequestFocus(true);
+
         loadConfig();
+
         try {
             start();
         } catch (IOException ex) {
@@ -97,8 +82,6 @@ class Server {
             JOptionPane.showMessageDialog(jframe, "Error starting server: " + error);
         }
     }
-
-    static String fileloc = Main.getUserDataPath() + "webprint.config";
 
     private void loadConfig() {
         File f = new File(fileloc);
@@ -133,8 +116,7 @@ class Server {
         }
     }
 
-    static String readFile(String path, Charset encoding)
-            throws IOException {
+    static String readFile(String path, Charset encoding) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, encoding);
     }
@@ -178,7 +160,6 @@ class Server {
 
     // Server threads
     class HttpHandler implements HttpRequestHandler {
-
         Server context;
         PrintManager pManager;
 
@@ -200,8 +181,12 @@ class Server {
             String responseBody = "1";
             if (method.equals("GET")) {
                 if (target.equals("/printwindow")) {
-                    responseBody = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/><style>h1, h2 { color:#0078ae; font-family:helvetica; font-size:110%; }</style>"
-                            + "<script>window.addEventListener('message',sendData); window.blur(); function sendData(event){ var data = JSON.parse(event.data); data.origin = event.origin; data = JSON.stringify(data); var xmlhttp=new XMLHttpRequest(); try { xmlhttp.open('POST','/',false); xmlhttp.send(data); if (xmlhttp.status!=200){ window.opener.postMessage({a:'error'}, '*'); return; } var response = xmlhttp.responseText; if (response!=1){ event.source.postMessage({a:'response', json:response}, '*'); } }catch(err){ window.opener.postMessage({a:'error'}, '*'); }  } window.opener.postMessage({a:'init'}, '*');</script></head>";
+                    responseBody = "<html><head>" +
+                            "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>" +
+                            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>" +
+                            "<style>h1, h2 { color:#0078ae; font-family:helvetica; font-size:110%; }</style>" +
+                            "<script>window.addEventListener('message',sendData); window.blur(); function sendData(event){ var data = JSON.parse(event.data); data.origin = event.origin; data = JSON.stringify(data); var xmlhttp=new XMLHttpRequest(); try { xmlhttp.open('POST','/',false); xmlhttp.send(data); if (xmlhttp.status!=200){ window.opener.postMessage({a:'error'}, '*'); return; } var response = xmlhttp.responseText; if (response!=1){ event.source.postMessage({a:'response', json:response}, '*'); } }catch(err){ window.opener.postMessage({a:'error'}, '*'); }  } window.opener.postMessage({a:'init'}, '*');</script>" +
+                            "</head>";
                     responseBody += "<body style='text-align:center;'>"
                             + "<h1 style='margin-top:50px;'>打印服务已连接</h1><h2>请不要关闭此窗口以便快速打印，您可以最小化此窗口。</h2>"
                             + "<h1 style='margin-top:10px;'>Connected to the Print Service</h1><h2>You can minimize this window, but leave it open for faster printing</h2>"
@@ -293,13 +278,15 @@ class Server {
                                     } else {
                                         responseJson.put("error", "No printer specified in the request.");
                                     }
-                                }
-                                if (action.equals("printhtml")) {
+                                } else if (action.equals("printhtml")) {
                                     pManager.setPrintPageSetting(printRequest.getPageSetting());
                                     pManager.setHTML(printRequest.getData());
                                     if (!pManager.printHTML(printRequest.getPrinter())) {
                                         responseJson.put("error", "Failed to print: " + pManager.getException());
                                     }
+                                } else if (action.equals("ocxprint")) {
+                                    OcxData ocxData = objectMapper.readValue(printRequest.getData(), OcxData.class);
+                                    JacobActiveX.run(ocxData.getClsId(), ocxData.getMethod(), ocxData.getParams());
                                 }
                                 System.out.println(action);
                             } else {
@@ -344,10 +331,10 @@ class Server {
 
             // Set up the HTTP protocol processor
             HttpProcessor httpproc = new ImmutableHttpProcessor(new HttpResponseInterceptor[]{
-                new ResponseDate(),
-                new ResponseServer(),
-                new ResponseContent(),
-                new ResponseConnControl()
+                    new ResponseDate(),
+                    new ResponseServer(),
+                    new ResponseContent(),
+                    new ResponseConnControl()
             });
 
             // Set up request handlers
