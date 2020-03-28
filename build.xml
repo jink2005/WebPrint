@@ -86,7 +86,7 @@
 
     <property name="jar.file"       value="${dist.dir}/${ant.project.name}.jar"/>
 
-    <target name="-ivy-retrieve" xmlns:ivy="antlib:fr.jayasoft.ivy.ant">
+    <target name="-ivy-retrieve" xmlns:ivy="antlib:org.apache.ivy.ant">
         <ivy:settings file="ivysettings.xml" />
         <ivy:resolve/> <!-- Tell Ivy to resolve dependencies -->
         <ivy:retrieve/> <!-- Load dependencies to the project -->
@@ -105,7 +105,7 @@
     <target name="-post-clean">
         <delete dir="lib"/>
     </target>
-    
+
     <target name="package-for-store" depends="jar">
 
         <!-- Change the value of this property to be the name of your JAR,
